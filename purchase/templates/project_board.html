@@ -1,0 +1,333 @@
+{% load humanize %}
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 1cm;
+            @frame footer {
+                -pdf-frame-content: footerContent;
+                bottom: 1cm; margin-left: 1cm; margin-right: 1cm; height: 1cm;
+            }
+        }
+        body { 
+            /* Clean, modern font stack */
+            font-family: 'Helvetica', 'Arial', sans-serif; 
+            font-size: 8.5pt; 
+            color: #2c3e50; /* Softer black/dark blue-gray */
+            line-height: 1.4;
+        }
+
+        .report-section {
+            page-break-inside: avoid;
+            margin-bottom: 20px; /* Increased spacing between blocks */
+        }
+
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            table-layout: fixed; 
+            margin-bottom: 10px; 
+            page-break-inside: auto; 
+        }
+
+        thead { 
+            display: table-header-group; 
+        }
+
+        /* Refined Section Header */
+        .section-header { 
+            background-color: #5cbeec; /* A slightly deeper, more professional blue */
+            color: #ffffff; 
+            padding: 6px 8px; 
+            font-weight: bold; 
+            font-size: 9pt;
+            text-transform: uppercase;
+            letter-spacing: 0.5pt;
+            -pdf-keep-with-next: true; 
+            border-radius: 2px 2px 0 0; /* Subtle aesthetic touch */
+        }
+
+        tr { 
+            page-break-inside: avoid; 
+        }
+
+        td, th { 
+            border: 0.2pt solid #d1d1d1; /* Thinner, lighter borders for a cleaner look */
+            padding: 6px 5px; /* More padding for airiness */
+            vertical-align: middle; 
+            word-wrap: break-word; 
+        }
+
+        /* Label styling */
+        .label { 
+            background-color: #f1f4f6; 
+            font-weight: bold; 
+            color: #444;
+            width: 110pt; 
+        }
+
+        .label { background-color: #f8f9fa; font-weight: bold; width: 120pt; }
+        .header-spec { background-color: #5cbeec; color: white; }
+        .header-expect { background-color: #dfed1c; color: #000; }
+        .header-supp { background-color: #4eaa51; color: white; }
+
+    </style>
+</head>
+<body>
+
+<div class="report-section">
+    <table style="width: 100%; border: none;">
+        <tr>
+            <td style="border: none; width: 65%; vertical-align: middle;">
+                <div style="font-size: 16pt; font-weight: bold; color: #5cbeec;">thyssenkrupp Automotive Body Solutions Pvt. Ltd.</div>
+
+                <div style="font-size: 8pt; color: #888; margin-top: 5px;">Doc No: {{ basicDetails.documentNo|default:"-" }}</div>
+            </td>
+            <td style="border: none; width: 35%; text-align: right; vertical-align: middle;">
+                <img src="{{ logo_path }}" style="height: 40px; width: auto;" alt="Company Logo">
+            </td>
+        </tr>
+    </table>
+
+    <table style="width: 100%; border: none; margin-top: 8px;">
+        <tr>
+            <td style="border: none; text-align: right; font-size: 8pt; color: #666;">
+                <strong>Date:</strong> {{ generated_at }} &nbsp;&nbsp; | &nbsp;&nbsp;
+                <strong>Currency:</strong> <span style="color: #000;">{{ basicDetails.currency|default:"INR" }}</span>
+            </td>
+        </tr>
+    </table>
+    <div style="border-top: 1.5pt solid #0077b6; margin-bottom: 10px;"></div>
+</div>
+
+<div class="report-section">
+    <div class="section-header">Project & Commercial Overview</div>
+    <table>
+        <tr>
+            <td class="label">Project Name</td><td>{{ basicDetails.projectName|default:"-" }}</td>
+            <td class="label">Document No</td><td>{{ basicDetails.documentNo|default:"-" }}</td>
+        </tr>
+        <tr>
+            <td class="label">Project Manager</td><td>{{ basicDetails.projectManager|default:"-" }}</td>
+            <td class="label">Commodity</td><td>{{ basicDetails.commodity|default:"-" }}</td>
+        </tr>
+        <tr>
+            <td class="label">Buyer</td><td>{{ basicDetails.buyerName|default:"-" }}</td>
+            <td class="label">RFQ Sign-Off</td><td>{{ basicDetails.rfqSignOff|default:"-" }}</td>
+        </tr>
+        <tr>
+            <td class="label">Cost Unit</td><td>{{ basicDetails.costUnit|default:"-" }}</td>
+            <td class="label">Currency</td><td>{{ basicDetails.currency|default:"INR" }}</td>
+        </tr>
+    </table>
+</div>
+
+<div class="report-section">
+    <div class="section-header">Commercial Requirements</div>
+    <table>
+        <tr>
+            <td class="label">Quotation Validity</td><td>{{ commercialRequirements.Period_Of_Quotation_Validity|default:"-" }}</td>
+            <td class="label">Energy Efficiency</td><td>{{ commercialRequirements.Energy_Efficiency_Requirements|default:"-" }}</td>
+        </tr>
+        <tr>
+            <td class="label">Risk / Qualification</td><td>{{ commercialRequirements.Risk_Category___Supplier_Qualification|default:"-" }}</td>
+            <td class="label">Customer Pre-Selected</td><td>{{ commercialRequirements.Customer_Pre_Selected|default:"-" }}</td>
+        </tr>
+    </table>
+</div>
+<table style="width: 100%; table-layout: fixed; border-collapse: collapse; margin-top: 10px;">
+    <thead>
+        <tr>
+            <th colspan="8" class="section-header">Selected Supplier Details</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td class="label" colspan="4">Selected Supplier</td>
+            <td colspan="4" style="font-weight: bold;">{{ customerSelection.selectedSupplier|default:"-" }}</td>
+        </tr>  
+        <tr>
+            <td class="label" colspan="4">Risk Category</td>
+            <td colspan="4">{{ customerSelection.riskCategory|default:"-" }}</td>
+        </tr>  
+
+
+                <tr>  
+            <td class="label" colspan="4">Before Neg.</td>
+            <td colspan="4">{{ customerSelection.grosstotal|default:"-" }}</td>    
+</tr> 
+        </tr>
+            <td class="label" colspan="4">After Neg.</td>
+            <td colspan="4" style="color: #27ae60; font-weight: bold;">{{ customerSelection.negotiationOverall.netTotal|default:"-" }}</td>
+    </tr>  
+         <tr>    
+            <td class="label" colspan="4">Discount</td>
+            <td colspan="4">{{ customerSelection.negotiationOverall.discountPercent|default:"-" }}</td>
+        </tr>
+    <tr>
+            <td class="label" colspan="4">Finalized By</td>
+            <td colspan="4">{{ customerSelection.finalizedDetails.finalizedBy|default:"-" }}</td>
+        </tr>
+    </tbody>
+</table>
+<div class="report-section">
+    <table style="width: 100%; table-layout: fixed; border-collapse: collapse;">
+        
+
+        <thead>
+            <tr>
+                <th colspan="8" class="section-header">1. Item Details Specification</th>
+            </tr>
+            <tr style="background-color: #f8f9fa; font-weight: bold; text-align: center;">
+                <th style="width: 30pt;">Pos</th>
+                <th style="width: 45pt;">Co No</th>
+                <th style="width: 60pt;">Item Cd</th>
+                <th>Description</th>
+                <th style="width: 45pt;">Unit No</th>
+                <th style="width: 55pt;">Ref PO</th>
+                <th style="width: 40pt;">Qty</th>
+                <th style="width: 40pt;">Unit</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in tableRows %}
+            <tr>
+                <td style="text-align: center;">{{ row.pos|default:"" }}</td>
+                <td style="text-align: center;">{{ row.co_no|default:"" }}</td>
+                <td style="text-align: center;">{{ row.itemCd|default:"" }}</td>
+                <td style="text-align: left; padding-left: 6pt;">{{ row.desc|default:"" }}</td>
+                <td style="text-align: center;">{{ row.unit_no|default:"" }}</td>
+                <td style="text-align: center;">{{ row.reference_po_no|default:"" }}</td>
+                <td style="text-align: center;">{{ row.qty|floatformat:1 }}</td>
+                <td style="text-align: center;">{{ row.unit|default:"" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot style="background-color: #f1f4f6; font-weight: bold;">
+            <tr>
+                <td style="text-align: center;">TOTAL</td>
+                <td style="text-align: right; padding-right: 5pt;" colspan="2">{{ basicDetails.currency_symbol|safe }} {{ totals.budget|floatformat:2|intcomma }}</td>
+                <td style="text-align: right; padding-right: 5pt;" colspan="2">{{ basicDetails.currency_symbol|safe }} {{ totals.target|floatformat:2|intcomma }}</td>
+                {% for s_total in totals.suppliers %}
+                <td style="text-align: right; padding-right: 5pt; background-color: #fff9c4;" colspan="{% if forloop.last %}3{% else %}1{% endif %}">
+                    {{ basicDetails.currency_symbol|safe }} {{ s_total|floatformat:2|intcomma }}
+                </td>
+                {% endfor %}
+            </tr>
+        </tfoot>
+        <tr style="border: none; height: 15px;"><td colspan="8" style="border: none;"></td></tr>
+
+        <thead>
+            <tr>
+                <th colspan="8" class="section-header">2. Commercial Comparison</th>
+            </tr>
+            <tr style="background-color: #f8f9fa; font-weight: bold; text-align: center;">
+                <th style="width: 40pt;">Pos</th>
+                <th style="width: 85pt; background-color: #fffde7;" colspan="2">Budget</th>
+                <th style="width: 85pt; background-color: #fffde7;" colspan="2">Target</th>
+                {% for supplier in suppliers %}
+                <th style="background-color: #eef7ff;" colspan="{% if forloop.last %}3{% else %}1{% endif %}">
+                    {{ supplier.supplierName }}
+                </th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in tableRows %}
+            <tr>
+                <td style="text-align: center; font-weight: bold; background-color: #fcfcfc;">{{ row.pos|default:"" }}</td>
+                <td style="text-align: right; padding-right: 5pt;" colspan="2">{{ basicDetails.currency_symbol|safe }} {{ row.budget|default:0|floatformat:2|intcomma }}</td>
+                <td style="text-align: right; padding-right: 5pt;" colspan="2">{{ basicDetails.currency_symbol|safe }} {{ row.target|default:0|floatformat:2|intcomma }}</td>
+                {% for s_val in row.pdf_suppliers %}
+                <td style="text-align: right; padding-right: 5pt;" colspan="{% if forloop.last %}3{% else %}1{% endif %}">
+                    {{ basicDetails.currency_symbol|safe }} {{ s_val.total_after|default:0|floatformat:2|intcomma }}
+                </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+
+
+        <tr style="border: none; height: 15px;"><td colspan="8" style="border: none;"></td></tr>
+
+    </table>
+</div>
+
+<div class="report-section">
+    <div class="section-header">Agreed Terms & Conditions</div>
+    <table>
+        <thead>
+            <tr style="background-color: #f8f9fa; font-weight: bold; text-align: center;">
+                <th style="width: 150pt;">Term</th>
+                <th>Expected Requirement</th>
+                <th>Agreed / Supplier Response</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for term_item in terms.existing %}
+            <tr>
+                <td style="background-color: #fcfcfc;"><strong>{{ term_item.term }}</strong></td>
+                <td>
+                    {% for row in term_item.expected %}
+                        <div class="row-entry">
+                            {% if row.text_detail %}{{ row.text_detail }}{% endif %}
+                            {% if row.percentage %} <span style="color: #0077b6;">( {{ row.percentage }}% )</span>{% endif %}
+                            {% if row.date %}<br><small style="color: #777;">Date: {{ row.date }}</small>{% endif %}
+                            {% if row.justification %}<br><small>Note: {{ row.justification }}</small>{% endif %}
+
+                        </div>
+                        {% if not forloop.last %}<hr>{% endif %}
+                    {% endfor %}
+                </td>
+                <td>
+                    {% for row in term_item.agreed %}
+                        <div class="row-entry">
+                            {% if row.text_detail %}{{ row.text_detail }}{% endif %}
+                            {% if row.percentage %} <span style="color: #27ae60;">( {{ row.percentage }}% )</span>{% endif %}
+                            {% if row.date %}<br><small style="color: #777;">Date: {{ row.date }}</small>{% endif %}
+                            {% if row.justification %}<br><small>Note: {{ row.justification }}</small>{% endif %}
+
+                        </div>
+                        {% if not forloop.last %}<hr>{% endif %}
+                    {% endfor %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="report-section">
+    <div class="section-header">Approval Sign-Off</div>
+    <table>
+        <thead>
+            <tr style="background-color: #f8f9fa; font-weight: bold; text-align: center;">
+                <th style="width: 50pt;">Level</th>
+                <th>Approver Name</th>
+                <th style="width: 100pt;">Status</th>
+                <th style="width: 120pt;">Action Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for approver in approvers %}
+            <tr>
+                <td style="text-align: center; font-weight: bold; background-color: #fcfcfc;">L{{ approver.level }}</td>
+                <td>{{ approver.approver_name }}</td>
+                <td style="text-align: center; font-weight: bold; color: #0077b6;">{{ approver.status }}</td>
+                <td style="text-align: center; color: #666;">{{ approver.action_date|default:"Pending" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+    <div id="footerContent" style="text-align: right; font-size: 7pt;">
+        Finalized by: {{ customerSelection.finalizedDetails.finalizedBy }} | Page <pdf:pagenumber> of <pdf:pagecount>
+    </div>
+
+</body>
+</html>

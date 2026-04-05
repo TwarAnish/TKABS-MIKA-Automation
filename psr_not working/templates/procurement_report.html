@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        @page { size: A4 landscape; margin: 0.5cm; }
+        body { font-family: 'Helvetica', 'Arial', sans-serif; color: #333; line-height: 1.1; margin: 0; }
+
+        /* Header */
+        .header-container {
+            border-bottom: 2px solid #01579b;
+            margin-bottom: 8px;
+            padding-bottom: 2px;
+        }
+        .report-title { color: #01579b; font-size: 14pt; font-weight: bold; margin: 0; }
+
+        /* 3-Column Card Grid (Compact) */
+        .card-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 8px 0;
+            margin-bottom: 8px;
+            margin-left: -8px;
+        }
+        .card {
+            width: 33.33%;
+            background-color: #fcfcfc;
+            border: 1px solid #dee2e6;
+            border-left: 3px solid #0288d1;
+            padding: 6px 10px;
+            vertical-align: middle;
+        }
+        .card-label { font-size: 6.5pt; color: #777; text-transform: uppercase; font-weight: bold; }
+        .card-value { font-size: 9pt; color: #333; font-weight: bold; }
+
+        /* Graph Container (Fixed height to save space) */
+        .chart-container {
+            text-align: center;
+            background-color: #ffffff;
+            padding: 5px;
+            border: 1px solid #efefef;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .chart-title {
+            font-size: 9pt; font-weight: bold; margin-bottom: 4px; color: #444; 
+            text-transform: uppercase; border-bottom: 1px solid #eee; display: inline-block;
+        }
+
+        /* Financial Table (Condensed for long lists) */
+        table.data-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        th { 
+            background-color: #6ab8dcfe;
+            text-align: center; vertical-align: middle; padding: 4px 2px; font-size: 7pt; text-transform: uppercase;
+        }
+        .cat-cell { background-color: #ffffff; color: #01579b; text-align: left; font-weight: bold; border: 1px solid #dee2e6; padding: 4px 6px; font-size: 7.5pt; }
+        td { border: 1px solid #dee2e6; padding: 3px 4px; font-size: 7pt; text-align: right; }
+        tr:nth-child(even) { background-color: #f8f9fa; }
+
+        .neg { color: #d32f2f; font-weight: bold; }
+        .pos { color: #2e7d32; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="header-container">
+        <div class="report-title">Procurement Summary Dashboard</div>
+    </div>
+
+    <table class="card-table">
+        <tr>
+            <td class="card">
+                <div class="card-label">Project Name</div>
+                <div class="card-value" style="color: #01579b;">{{ details.project_name|default:"-" }}</div>
+            </td>
+            <td class="card">
+                <div class="card-label">Project ID (CO#)</div>
+                <div class="card-value">{{ details.co_no|default:"-" }}</div>
+            </td>
+            <td class="card">
+                <div class="card-label">Project Manager</div>
+                <div class="card-value">{{ details.project_manager|default:"-" }}</div>
+            </td>
+        </tr>
+    </table>
+    <table class="card-table">
+        <tr>
+            <td class="card">
+                <div class="card-label">Settlement Period</div>
+                <div class="card-value">{{ details.settlement_period|default:"-" }}</div>
+            </td>
+            <td class="card">
+                <div class="card-label">CW Number / Phase</div>
+                <div class="card-value">{{ details.cw_no|default:"N/A" }}</div>
+            </td>
+            <td class="card">
+                <div class="card-label">Reporting Date</div>
+                <div class="card-value">{{ snapshot_date }}</div>
+            </td>
+        </tr>
+    </table>
+
+<div class="chart-container" style="margin-bottom: 5px; padding: 5px;">
+    <div class="chart-title" style="background-color: #6ab8dcfe; font-size: 8pt; margin-bottom: 2px;">Cost Trend Analysis (INR Millions)</div>
+    {% if graph_image %}
+        <img src="data:image/png;base64,{{ graph_image }}" style="width: 80%; max-height: 160px; height: auto; display: block; margin: 0 auto;">
+    {% endif %}
+</div>
+<div class="chart-container" style="margin-bottom: 5px; padding: 5px;">
+
+    <div class="chart-title" style="background-color: #6ab8dcfe; font-size: 8pt; margin-bottom: 2px;">Cost Trend Analysis Table</div>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th rowspan="2" style="width: 15%;">Category</th>
+                <th colspan="2">Budget (M)</th>
+                <th colspan="3">Actual (M)</th>
+                <th rowspan="2">Forecast</th>
+                <th rowspan="2">Prognosis</th>
+                <th rowspan="2">Balance</th>
+                <th rowspan="2">Balance %</th>
+                <th rowspan="2">Rest</th>
+                <th rowspan="2">Rest %</th>
+            </tr>
+            <tr>
+                <th>Baseline</th>
+                <th>Actual</th>
+                <th>Current</th>
+                <th>Last</th>
+                <th>Diff</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for key, val in snapshot.items %}
+            <tr>
+                <td class="cat-cell">{{ key }}</td>
+                <td>{{ val.baseline_budget|floatformat:0 }}</td>
+                <td>{{ val.budget|floatformat:0 }}</td>
+                <td >{{ val.actuals|floatformat:0 }}</td>
+                <td>{{ val.last_month_actuals|floatformat:0 }}</td>
+                <td class="{% if val.actual_difference > 0 %}neg{% else %}pos{% endif %}">
+                    {{ val.actual_difference|floatformat:0 }}
+                </td>
+                <td>{{ val.forecast|floatformat:0 }}</td>
+                <td>{{ val.prognosis|floatformat:0 }}</td>
+                <td>{{ val.balance|floatformat:0 }}</td>
+                <td>{{ val.balance_percentage|floatformat:1 }}%</td>
+                <td>{{ val.rest|floatformat:0 }}</td>
+                <td>{{ val.rest_percentage|floatformat:1 }}%</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+
+</body>
+</html>
